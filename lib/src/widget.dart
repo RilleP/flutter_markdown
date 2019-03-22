@@ -20,7 +20,8 @@ typedef void MarkdownTapLinkCallback(String href);
 /// Creates a format [TextSpan] given a string.
 ///
 /// Used by [MarkdownWidget] to highlight the contents of `pre` elements.
-abstract class SyntaxHighlighter { // ignore: one_member_abstracts
+abstract class SyntaxHighlighter {
+  // ignore: one_member_abstracts
   /// Returns the formated [TextSpan] for the given string.
   TextSpan format(String source);
 }
@@ -43,11 +44,12 @@ abstract class MarkdownWidget extends StatefulWidget {
     Key key,
     @required this.data,
     this.styleSheet,
+    this.textAlign = TextAlign.start,
     this.syntaxHighlighter,
     this.onTapLink,
     this.imageDirectory,
-  }) : assert(data != null),
-       super(key: key);
+  })  : assert(data != null),
+        super(key: key);
 
   /// The Markdown to display.
   final String data;
@@ -56,6 +58,8 @@ abstract class MarkdownWidget extends StatefulWidget {
   ///
   /// If null, the styles are inferred from the current [Theme].
   final MarkdownStyleSheet styleSheet;
+
+  final TextAlign textAlign;
 
   /// The syntax highlighter used to color text in `pre` elements.
   ///
@@ -90,9 +94,7 @@ class _MarkdownWidgetState extends State<MarkdownWidget> implements MarkdownBuil
   @override
   void didUpdateWidget(MarkdownWidget oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.data != oldWidget.data
-        || widget.styleSheet != oldWidget.styleSheet)
-      _parseMarkdown();
+    if (widget.data != oldWidget.data || widget.styleSheet != oldWidget.styleSheet) _parseMarkdown();
   }
 
   @override
@@ -112,35 +114,32 @@ class _MarkdownWidgetState extends State<MarkdownWidget> implements MarkdownBuil
     final MarkdownBuilder builder = new MarkdownBuilder(
       delegate: this,
       styleSheet: styleSheet,
+      textAlign: widget.textAlign,
       imageDirectory: widget.imageDirectory,
     );
     _children = builder.build(document.parseLines(lines));
   }
 
   void _disposeRecognizers() {
-    if (_recognizers.isEmpty)
-      return;
+    if (_recognizers.isEmpty) return;
     final List<GestureRecognizer> localRecognizers = new List<GestureRecognizer>.from(_recognizers);
     _recognizers.clear();
-    for (GestureRecognizer recognizer in localRecognizers)
-      recognizer.dispose();
+    for (GestureRecognizer recognizer in localRecognizers) recognizer.dispose();
   }
 
   @override
   GestureRecognizer createLink(String href) {
     final TapGestureRecognizer recognizer = new TapGestureRecognizer()
       ..onTap = () {
-      if (widget.onTapLink != null)
-        widget.onTapLink(href);
-    };
+        if (widget.onTapLink != null) widget.onTapLink(href);
+      };
     _recognizers.add(recognizer);
     return recognizer;
   }
 
   @override
   TextSpan formatText(MarkdownStyleSheet styleSheet, String code) {
-    if (widget.syntaxHighlighter != null)
-      return widget.syntaxHighlighter.format(code);
+    if (widget.syntaxHighlighter != null) return widget.syntaxHighlighter.format(code);
     return new TextSpan(style: styleSheet.code, text: code);
   }
 
@@ -167,18 +166,17 @@ class MarkdownBody extends MarkdownWidget {
     MarkdownTapLinkCallback onTapLink,
     Directory imageDirectory,
   }) : super(
-    key: key,
-    data: data,
-    styleSheet: styleSheet,
-    syntaxHighlighter: syntaxHighlighter,
-    onTapLink: onTapLink,
-    imageDirectory: imageDirectory,
-  );
+          key: key,
+          data: data,
+          styleSheet: styleSheet,
+          syntaxHighlighter: syntaxHighlighter,
+          onTapLink: onTapLink,
+          imageDirectory: imageDirectory,
+        );
 
   @override
   Widget build(BuildContext context, List<Widget> children) {
-    if (children.length == 1)
-      return children.single;
+    if (children.length == 1) return children.single;
     return new Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: children,
@@ -201,18 +199,20 @@ class Markdown extends MarkdownWidget {
     Key key,
     String data,
     MarkdownStyleSheet styleSheet,
+    TextAlign textAlign,
     SyntaxHighlighter syntaxHighlighter,
     MarkdownTapLinkCallback onTapLink,
     Directory imageDirectory,
     this.padding: const EdgeInsets.all(16.0),
   }) : super(
-    key: key,
-    data: data,
-    styleSheet: styleSheet,
-    syntaxHighlighter: syntaxHighlighter,
-    onTapLink: onTapLink,
-    imageDirectory: imageDirectory,
-  );
+          key: key,
+          data: data,
+          styleSheet: styleSheet,
+          textAlign: textAlign,
+          syntaxHighlighter: syntaxHighlighter,
+          onTapLink: onTapLink,
+          imageDirectory: imageDirectory,
+        );
 
   /// The amount of space by which to inset the children.
   final EdgeInsets padding;
